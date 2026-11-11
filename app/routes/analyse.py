@@ -1,5 +1,6 @@
 from fastapi import APIRouter, UploadFile, File, HTTPException
-from services.image import validate_image,resize_image, save_image
+from app.services.image import validate_image,resize_image, save_image
+from app.services.vision import analyse_image as run_vision_analysis
 import uuid
 
 router = APIRouter(
@@ -23,8 +24,14 @@ async def process_single_file(file:UploadFile):
     # Save the image
     save_image(resized_content,"uploads", unique_name)
 
+    result = await run_vision_analysis(resized_content, file.content_type)
+    print(f"Analysis result for {file.filename}:{result}")
+    return result
+
 @router.post("/")
 async def analyse_image(file:UploadFile = File(...)):
     """Endpoint to upload an image for disease detection."""
     if not file.content_type.startswith("image/"):
-        raise HTTPException(status_code=400, details ="Invalid file type. Please upload an image.")
+        raise HTTPException(status_code=400, detail="Invalid file type. Please upload an image.")
+
+    return await process_single_file(file)
