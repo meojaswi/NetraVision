@@ -39,7 +39,7 @@ def resize_image(content:bytes) -> bytes:
         new_width = int((maximum_dimension / height) * width)  
 
 
-    resized_image = image.resize((new_width,new_height), Image.ANTIALIAS)
+    resized_image = image.resize((new_width,new_height), Image.Resampling.LANCZOS)
     output=io.BytesIO()
     resized_image.save(output, format=image.format)
     return output.getvalue()
